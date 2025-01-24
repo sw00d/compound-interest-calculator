@@ -1,0 +1,155 @@
+import { Box, Typography } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
+import { LineChart } from "@mui/x-charts";
+
+export default function InvestmentChart({ initialInvestment, legs }) {
+  const theme = useTheme();
+
+  const calculateInvestmentGrowth = () => {
+    const totalYears = legs.reduce((sum, leg) => sum + leg.years, 0);
+    const years = Array.from({ length: totalYears + 1 }, (_, i) => i);
+
+    // Initialize data series for each leg
+    const data = legs.map((leg) => ({
+      label: `${leg.years} years at ${leg.interestRate}%`,
+      color: leg.color,
+      data: new Array(totalYears + 1).fill(null),
+    }));
+
+    // Calculate growth for each period
+    let currentYear = 0;
+    let currentValue = initialInvestment; // Only use initialInvestment at the very start
+
+    // Fill in initial value at year 0 for the first leg only
+    data[0].data[0] = currentValue;
+
+    legs.forEach((leg, legIndex) => {
+      const monthlyRate = leg.interestRate / 100 / 12;
+
+      // Fill in values for this leg's period
+      for (
+        let year = currentYear + 1;
+        year <= currentYear + leg.years;
+        year++
+      ) {
+        // Calculate growth for the year (12 months)
+        for (let month = 0; month < 12; month++) {
+          currentValue =
+            (currentValue + leg.monthlyContribution) * (1 + monthlyRate);
+        }
+        data[legIndex].data[year] = currentValue;
+      }
+
+      // If there's a next leg, set its starting point
+      if (legIndex < legs.length - 1) {
+        data[legIndex + 1].data[currentYear + leg.years] = currentValue;
+      }
+
+      currentYear += leg.years;
+    });
+
+    return { data, years };
+  };
+
+  const { data, years } = calculateInvestmentGrowth();
+
+  // Get ending values for each period
+  const periodEndValues = data.map((series) => {
+    const lastValue = series.data.filter(Boolean).pop();
+    return {
+      label: series.label,
+      value: lastValue,
+      color: series.color,
+    };
+  });
+
+  return (
+    <Box>
+      <Box
+        sx={{
+          gap: 2,
+          mb: 2,
+          p: 1,
+          borderRadius: 1,
+          backgroundColor: "rgba(0,0,0,0.02)",
+        }}
+      >
+        {periodEndValues.map((period, index) => (
+          <Box
+            key={index}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+            }}
+          >
+            <Box
+              sx={{
+                width: 12,
+                height: 12,
+                borderRadius: "50%",
+                backgroundColor: period.color,
+              }}
+            />
+            <Typography>
+              End of period {index + 1}:{" "}
+              {new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 0,
+              }).format(period.value)}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+
+      <Box sx={{ width: "100%", height: "400px" }}>
+        <LineChart
+          series={data.map((series) => ({
+            ...series,
+            area: true,
+            showMark: false,
+            highlightScope: {
+              highlighted: "point",
+              faded: "global",
+            },
+            valueFormatter: (value) => {
+              if (value === null) return null;
+              return new Intl.NumberFormat("en-US", {
+                style: "currency",
+                currency: "USD",
+                maximumFractionDigits: 0,
+              }).format(value);
+            },
+          }))}
+          xAxis={[
+            {
+              data: years,
+              label: "Years",
+              scaleType: "linear",
+            },
+          ]}
+          slots={{
+            legend: () => null,
+          }}
+          height={400}
+          margin={{ left: 80, right: 20, top: 20, bottom: 30 }}
+          sx={{
+            ".MuiLineElement-root": {
+              strokeWidth: 2,
+            },
+            ".MuiChartsAxis-line": {
+              stroke: theme.palette.text.secondary,
+            },
+            ".MuiAreaElement-root": {
+              fillOpacity: 0.15,
+            },
+          }}
+          // tooltip={{
+          //   trigger: "axis",
+          // }}
+        />
+      </Box>
+    </Box>
+  );
+}
