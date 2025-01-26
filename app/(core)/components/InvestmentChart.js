@@ -71,36 +71,68 @@ export default function InvestmentChart({ initialInvestment, legs }) {
           mb: 2,
           p: 1,
           borderRadius: 1,
+          display: "flex",
+          justifyContent:
+            periodEndValues.length > 1 ? "space-between" : "center",
+          alignItems: "center",
           backgroundColor: "rgba(0,0,0,0.02)",
         }}
       >
-        {periodEndValues.map((period, index) => (
-          <Box
-            key={index}
+        {periodEndValues.length > 1 && (
+          <Box>
+            {periodEndValues.map((period, index) => (
+              <Box
+                key={index}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 12,
+                    height: 12,
+                    borderRadius: "50%",
+                    backgroundColor: period.color,
+                  }}
+                />
+                <Typography
+                  sx={{
+                    fontSize: 14,
+                    color: "#666",
+                  }}
+                >
+                  End of period {index + 1}:{" "}
+                  <Box className="value" component="span">
+                    {new Intl.NumberFormat("en-US", {
+                      style: "currency",
+                      currency: "USD",
+                      maximumFractionDigits: 0,
+                    }).format(period.value)}
+                  </Box>
+                </Typography>
+              </Box>
+            ))}
+          </Box>
+        )}
+
+        <Box>
+          <Typography
             sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 1,
+              fontSize: 20,
+              fontWeight: 700,
+              color: "#34D399",
             }}
           >
-            <Box
-              sx={{
-                width: 12,
-                height: 12,
-                borderRadius: "50%",
-                backgroundColor: period.color,
-              }}
-            />
-            <Typography>
-              End of period {index + 1}:{" "}
-              {new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-                maximumFractionDigits: 0,
-              }).format(period.value)}
-            </Typography>
-          </Box>
-        ))}
+            Total:{" "}
+            {new Intl.NumberFormat("en-US", {
+              style: "currency",
+              currency: "USD",
+              maximumFractionDigits: 0,
+            }).format(periodEndValues[periodEndValues.length - 1].value)}
+          </Typography>
+        </Box>
       </Box>
 
       <Box sx={{ width: "100%", height: "400px" }}>
@@ -127,13 +159,15 @@ export default function InvestmentChart({ initialInvestment, legs }) {
               data: years,
               label: "Years",
               scaleType: "linear",
+              valueFormatter: (value) =>
+                `Year ${value.toString()} (${new Date().getFullYear() + value})`,
             },
           ]}
           slots={{
             legend: () => null,
           }}
           height={400}
-          margin={{ left: 80, right: 20, top: 20, bottom: 30 }}
+          margin={{ left: 80, right: 20, top: 20, bottom: 40 }}
           sx={{
             ".MuiLineElement-root": {
               strokeWidth: 2,

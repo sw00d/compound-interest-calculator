@@ -13,93 +13,49 @@ import {
   IconButton,
 } from "@mui/material";
 import InvestmentChart from "../(core)/components/InvestmentChart";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
-
-const getInitialState = (currentTabId) => {
-  const savedData = localStorage.getItem(
-    `investmentCalculator-${currentTabId}`,
-  );
-  if (savedData) {
-    try {
-      const parsed = JSON.parse(savedData);
-      return {
-        legs: parsed.legs,
-        initialInvestment: parsed.initialInvestment,
-      };
-    } catch (e) {
-      return getDefaultState();
-    }
-  }
-
-  return getDefaultState();
-};
-
-const getDefaultState = () => ({
-  legs: [
-    {
-      id: 1,
-      monthlyContribution: 500,
-      years: 10,
-      interestRate: 7,
-      color: "#34D399",
-    },
-  ],
-  initialInvestment: 10000,
-});
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectActiveTab,
+  selectActiveTabData,
+  updateTabData,
+  updateLeg,
+  addLeg,
+} from "../(core)/store/tabs/tabsSlice";
 
 export default function Home() {
-  const [currentTabId] = useState("tab1"); // In the future, this will be dynamic with tab switching
-  const initialState = getInitialState(currentTabId);
-  const [legs, setLegs] = useState(initialState.legs);
-  const [initialInvestment, setInitialInvestment] = useState(
-    initialState.initialInvestment,
-  );
-
+  const dispatch = useDispatch();
+  const activeTab = useSelector(selectActiveTab);
+  const activeTabData = useSelector(selectActiveTabData);
   const [expandedPeriod, setExpandedPeriod] = useState(1);
 
-  useEffect(() => {
-    const dataToSave = {
-      legs,
-      initialInvestment,
-      lastModified: new Date().toISOString(),
-    };
-    localStorage.setItem(
-      `investmentCalculator-${currentTabId}`,
-      JSON.stringify(dataToSave),
-    );
-  }, [legs, initialInvestment, currentTabId]);
-
   const handleLegChange = (legId, field, value) => {
-    setLegs(
-      legs.map((leg) => (leg.id === legId ? { ...leg, [field]: value } : leg)),
+    dispatch(
+      updateLeg({
+        tabId: activeTab.id,
+        legId,
+        field,
+        value,
+      })
     );
   };
 
-  const addLeg = () => {
-    const newId = Math.max(...legs.map((leg) => leg.id)) + 1;
-    const listOfColors = [
-      "#34D399",
-      "#60A5FA",
-      "#F472B6",
-      "#F97316",
-      "#FBBF24",
-      "#b18ce7",
-      "#00B4D8",
-      "#F472B6",
-    ];
+  const handleInitialInvestmentChange = (value) => {
+    dispatch(
+      updateTabData({
+        tabId: activeTab.id,
+        data: {
+          ...activeTabData,
+          initialInvestment: value,
+        },
+      })
+    );
+  };
 
-    setLegs([
-      ...legs,
-      {
-        id: newId,
-        monthlyContribution: 500,
-        years: 5,
-        interestRate: 7,
-        color: listOfColors[legs.length % listOfColors.length],
-      },
-    ]);
-    setExpandedPeriod(newId);
+  const handleAddLeg = () => {
+    dispatch(addLeg({ tabId: activeTab.id }));
+    setExpandedPeriod(activeTabData.legs.length + 1);
   };
 
   const handleAccordionChange = (legId) => (event, isExpanded) => {
@@ -111,9 +67,17 @@ export default function Home() {
   };
 
   const removeLeg = (legId) => {
-    if (legs.length > 1) {
+    if (activeTabData.legs.length > 1) {
       // Prevent removing the last period
-      setLegs(legs.filter((leg) => leg.id !== legId));
+      dispatch(
+        updateTabData({
+          tabId: activeTab.id,
+          data: {
+            ...activeTabData,
+            legs: activeTabData.legs.filter((leg) => leg.id !== legId),
+          },
+        })
+      );
     }
   };
 
@@ -145,13 +109,15 @@ export default function Home() {
           <TextField
             label="Initial Investment"
             type="number"
-            value={initialInvestment}
-            onChange={(e) => setInitialInvestment(Number(e.target.value))}
+            value={activeTabData.initialInvestment}
+            onChange={(e) =>
+              handleInitialInvestmentChange(Number(e.target.value))
+            }
             fullWidth
             margin="normal"
           />
 
-          {legs.map((leg, index) => (
+          {activeTabData.legs.map((leg, index) => (
             <Box sx={{ position: "relative" }} key={leg.id}>
               <Accordion
                 expanded={expandedPeriod === leg.id}
@@ -186,7 +152,7 @@ export default function Home() {
                       handleLegChange(
                         leg.id,
                         "monthlyContribution",
-                        Number(e.target.value),
+                        Number(e.target.value)
                       )
                     }
                     fullWidth
@@ -212,7 +178,7 @@ export default function Home() {
                       handleLegChange(
                         leg.id,
                         "interestRate",
-                        Number(e.target.value),
+                        Number(e.target.value)
                       )
                     }
                     fullWidth
@@ -220,31 +186,33 @@ export default function Home() {
                   />
                 </AccordionDetails>
               </Accordion>
-              <IconButton
-                disabled={legs.length === 1}
-                onClick={(e) => {
-                  e.stopPropagation(); // Prevent accordion from toggling
-                  removeLeg(leg.id);
-                }}
-                sx={{
-                  position: "absolute",
-                  right: 8, // Position it to the left of the expand icon
-                  top: expandedPeriod === leg.id ? 12 : 4,
-                  transition: "all 0.3s",
-                  color: "text.secondary",
-                  "&:hover": {
-                    color: "error.main",
-                  },
-                }}
-              >
-                <RemoveCircleOutlineIcon sx={{ transition: "all 0.1s" }} />
-              </IconButton>
+              {index === activeTabData.legs.length - 1 && index > 0 && (
+                <IconButton
+                  disabled={activeTabData.legs.length === 1}
+                  onClick={(e) => {
+                    e.stopPropagation(); // Prevent accordion from toggling
+                    removeLeg(leg.id);
+                  }}
+                  sx={{
+                    position: "absolute",
+                    right: 8, // Position it to the left of the expand icon
+                    top: expandedPeriod === leg.id ? 12 : 4,
+                    transition: "all 0.3s",
+                    color: "text.secondary",
+                    "&:hover": {
+                      color: "error.main",
+                    },
+                  }}
+                >
+                  <RemoveCircleOutlineIcon sx={{ transition: "all 0.1s" }} />
+                </IconButton>
+              )}
             </Box>
           ))}
 
           <Button
             variant="outlined"
-            onClick={addLeg}
+            onClick={handleAddLeg}
             sx={{ mt: 1, textTransform: "none" }}
           >
             Add Period
@@ -260,7 +228,10 @@ export default function Home() {
           borderRadius: 4,
         }}
       >
-        <InvestmentChart initialInvestment={initialInvestment} legs={legs} />
+        <InvestmentChart
+          initialInvestment={activeTabData.initialInvestment}
+          legs={activeTabData.legs}
+        />
       </Card>
     </Box>
   );
