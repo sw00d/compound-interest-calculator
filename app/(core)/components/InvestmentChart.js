@@ -166,8 +166,7 @@ export default function InvestmentChart({ initialInvestment, legs }) {
               data: years,
               label: "Years",
               scaleType: "linear",
-              valueFormatter: (value) =>
-                `Year ${value.toString()} (${new Date().getFullYear() + value})`,
+              valueFormatter: (value) => `Year ${value.toString()}`,
             },
           ]}
           slots={{

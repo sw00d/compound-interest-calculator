@@ -51,7 +51,15 @@ a {
 
 @media (min-width: 768px) {  /* md breakpoint */
   .content-wrapper {
+      padding-left: 4rem;   /* equivalent to px-36 */
+      padding-right: 4rem;  /* equivalent to px-36 */
+  }
+}
+
+@media (min-width: 1200px) {  /* md breakpoint */
+  .content-wrapper {
       padding-left: 9rem;   /* equivalent to px-36 */
       padding-right: 9rem;  /* equivalent to px-36 */
   }
 }
+
