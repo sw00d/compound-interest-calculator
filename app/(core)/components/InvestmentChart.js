@@ -1,9 +1,10 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { LineChart } from "@mui/x-charts";
 
 export default function InvestmentChart({ initialInvestment, legs }) {
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const calculateInvestmentGrowth = () => {
     const totalYears = legs.reduce((sum, leg) => sum + leg.years, 0);
@@ -67,11 +68,12 @@ export default function InvestmentChart({ initialInvestment, legs }) {
     <Box>
       <Box
         sx={{
-          gap: 2,
-          mb: 2,
-          p: 1,
+          gap: 1,
+          mb: { xs: 1, md: 2 },
+          p: { xs: 0.5, md: 1 },
           borderRadius: 1,
           display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
           justifyContent:
             periodEndValues.length > 1 ? "space-between" : "center",
           alignItems: "center",
@@ -135,7 +137,12 @@ export default function InvestmentChart({ initialInvestment, legs }) {
         </Box>
       </Box>
 
-      <Box sx={{ width: "100%", height: "400px" }}>
+      <Box
+        sx={{
+          width: "100%",
+          height: { xs: "300px", md: "400px" },
+        }}
+      >
         <LineChart
           series={data.map((series) => ({
             ...series,
@@ -166,8 +173,13 @@ export default function InvestmentChart({ initialInvestment, legs }) {
           slots={{
             legend: () => null,
           }}
-          height={400}
-          margin={{ left: 80, right: 20, top: 20, bottom: 40 }}
+          height={isMobile ? 300 : 400}
+          margin={{
+            left: isMobile ? 60 : 80,
+            right: isMobile ? 10 : 20,
+            top: isMobile ? 10 : 20,
+            bottom: isMobile ? 30 : 40,
+          }}
           sx={{
             ".MuiLineElement-root": {
               strokeWidth: 2,
@@ -177,6 +189,9 @@ export default function InvestmentChart({ initialInvestment, legs }) {
             },
             ".MuiAreaElement-root": {
               fillOpacity: 0.15,
+            },
+            "& .MuiChartsAxis-tick": {
+              fontSize: isMobile ? "0.75rem" : "0.875rem",
             },
           }}
           // tooltip={{

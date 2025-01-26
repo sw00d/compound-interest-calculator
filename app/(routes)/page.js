@@ -87,22 +87,31 @@ export default function Home() {
       sx={{
         minHeight: "100vh",
         display: "flex",
+        flexDirection: {
+          xs: "column",
+          md: "row",
+        },
         alignItems: "flex-start",
         justifyContent: "center",
-        mt: 2,
+        mt: { xs: 1, md: 2 },
         gap: 1,
+        px: { xs: 1, md: 2 },
       }}
     >
       <Card
         sx={{
           width: "100%",
-          p: 1,
+          p: { xs: 0.5, md: 1 },
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           borderRadius: 4,
         }}
       >
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
+        <CardContent sx={{ p: { xs: 1, md: 2 } }}>
+          <Typography
+            variant="h6"
+            gutterBottom
+            sx={{ fontSize: { xs: "1rem", md: "1.25rem" } }}
+          >
             Investment Calculator
           </Typography>
 
@@ -115,6 +124,7 @@ export default function Home() {
             }
             fullWidth
             margin="normal"
+            size="small"
           />
 
           {activeTabData.legs.map((leg, index) => (
@@ -223,7 +233,7 @@ export default function Home() {
       <Card
         sx={{
           width: "100%",
-          p: 1,
+          p: { xs: 0.5, md: 1 },
           boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
           borderRadius: 4,
         }}
