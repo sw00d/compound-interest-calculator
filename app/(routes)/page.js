@@ -16,42 +16,45 @@ import InvestmentChart from "../(core)/components/InvestmentChart";
 import { useState, useEffect } from "react";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 
+const getInitialState = (currentTabId) => {
+  const savedData = localStorage.getItem(
+    `investmentCalculator-${currentTabId}`,
+  );
+  if (savedData) {
+    try {
+      const parsed = JSON.parse(savedData);
+      return {
+        legs: parsed.legs,
+        initialInvestment: parsed.initialInvestment,
+      };
+    } catch (e) {
+      return getDefaultState();
+    }
+  }
+
+  return getDefaultState();
+};
+
+const getDefaultState = () => ({
+  legs: [
+    {
+      id: 1,
+      monthlyContribution: 500,
+      years: 10,
+      interestRate: 7,
+      color: "#34D399",
+    },
+  ],
+  initialInvestment: 10000,
+});
+
 export default function Home() {
   const [currentTabId] = useState("tab1"); // In the future, this will be dynamic with tab switching
-
-  const [legs, setLegs] = useState(() => {
-    if (typeof window !== "undefined") {
-      const savedData = localStorage.getItem(
-        `investmentCalculator-${currentTabId}`,
-      );
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        return parsed.legs;
-      }
-    }
-    return [
-      {
-        id: 1,
-        monthlyContribution: 500,
-        years: 10,
-        interestRate: 7,
-        color: "#34D399",
-      },
-    ];
-  });
-
-  const [initialInvestment, setInitialInvestment] = useState(() => {
-    if (typeof window !== "undefined") {
-      const savedData = localStorage.getItem(
-        `investmentCalculator-${currentTabId}`,
-      );
-      if (savedData) {
-        const parsed = JSON.parse(savedData);
-        return parsed.initialInvestment;
-      }
-    }
-    return 10000;
-  });
+  const initialState = getInitialState(currentTabId);
+  const [legs, setLegs] = useState(initialState.legs);
+  const [initialInvestment, setInitialInvestment] = useState(
+    initialState.initialInvestment,
+  );
 
   const [expandedPeriod, setExpandedPeriod] = useState(1);
 
