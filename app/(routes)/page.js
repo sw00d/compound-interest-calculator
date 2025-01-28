@@ -122,6 +122,11 @@ export default function Home() {
           <TextField
             label="Initial Investment"
             type="number"
+            slotProps={{
+              htmlInput: {
+                min: 0,
+              },
+            }}
             value={
               activeTabData.initialInvestment === ""
                 ? ""
@@ -167,6 +172,11 @@ export default function Home() {
                   <TextField
                     label="Monthly Contribution"
                     type="number"
+                    slotProps={{
+                      htmlInput: {
+                        min: 0,
+                      },
+                    }}
                     value={
                       leg.monthlyContribution === ""
                         ? ""
@@ -186,6 +196,11 @@ export default function Home() {
                   <TextField
                     label="Years"
                     type="number"
+                    slotProps={{
+                      htmlInput: {
+                        min: 0,
+                      },
+                    }}
                     value={leg.years === "" ? "" : leg.years}
                     onChange={(e) =>
                       handleLegChange(
@@ -201,6 +216,11 @@ export default function Home() {
                   <TextField
                     label="Interest Rate (%)"
                     type="number"
+                    slotProps={{
+                      htmlInput: {
+                        min: 0,
+                      },
+                    }}
                     value={leg.interestRate === "" ? "" : leg.interestRate}
                     onChange={(e) =>
                       handleLegChange(
