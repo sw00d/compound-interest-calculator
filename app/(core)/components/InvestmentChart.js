@@ -25,7 +25,8 @@ export default function InvestmentChart({ initialInvestment, legs }) {
     data[0].data[0] = currentValue;
 
     legs.forEach((leg, legIndex) => {
-      const monthlyRate = leg.interestRate / 100 / 12;
+      // Use annual rate directly instead of monthly
+      const annualRate = leg.interestRate / 100;
 
       // Fill in values for this leg's period
       for (
@@ -33,11 +34,9 @@ export default function InvestmentChart({ initialInvestment, legs }) {
         year <= currentYear + leg.years;
         year++
       ) {
-        // Calculate growth for the year (12 months)
-        for (let month = 0; month < 12; month++) {
-          currentValue =
-            (currentValue + leg.monthlyContribution) * (1 + monthlyRate);
-        }
+        // Simple annual calculation instead of monthly compounding
+        currentValue =
+          (currentValue + leg.monthlyContribution * 12) * (1 + annualRate);
         data[legIndex].data[year] = currentValue;
       }
 
@@ -110,7 +109,7 @@ export default function InvestmentChart({ initialInvestment, legs }) {
                     {new Intl.NumberFormat("en-US", {
                       style: "currency",
                       currency: "USD",
-                      maximumFractionDigits: 0,
+                      maximumFractionDigits: 2,
                     }).format(period.value)}
                   </Box>
                 </Typography>
@@ -131,7 +130,7 @@ export default function InvestmentChart({ initialInvestment, legs }) {
             {new Intl.NumberFormat("en-US", {
               style: "currency",
               currency: "USD",
-              maximumFractionDigits: 0,
+              maximumFractionDigits: 2,
             }).format(periodEndValues[periodEndValues.length - 1].value)}
           </Typography>
         </Box>
@@ -157,7 +156,7 @@ export default function InvestmentChart({ initialInvestment, legs }) {
               return new Intl.NumberFormat("en-US", {
                 style: "currency",
                 currency: "USD",
-                maximumFractionDigits: 0,
+                maximumFractionDigits: 3,
               }).format(value);
             },
           }))}
