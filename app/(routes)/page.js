@@ -36,7 +36,7 @@ export default function Home() {
         tabId: activeTab.id,
         legId,
         field,
-        value,
+        value: value === "" ? "" : value,
       })
     );
   };
@@ -47,7 +47,7 @@ export default function Home() {
         tabId: activeTab.id,
         data: {
           ...activeTabData,
-          initialInvestment: value,
+          initialInvestment: value === "" ? "" : value,
         },
       })
     );
@@ -63,7 +63,11 @@ export default function Home() {
   };
 
   const formatPeriodTitle = (leg) => {
-    return `${leg.years} years at ${leg.interestRate}% with $${leg.monthlyContribution}/month`;
+    return `${leg.years} years at ${leg.interestRate}% ${
+      leg.monthlyContribution > 0
+        ? `with $${leg.monthlyContribution}/month`
+        : ""
+    }`;
   };
 
   const removeLeg = (legId) => {
@@ -118,9 +122,15 @@ export default function Home() {
           <TextField
             label="Initial Investment"
             type="number"
-            value={activeTabData.initialInvestment}
+            value={
+              activeTabData.initialInvestment === ""
+                ? ""
+                : activeTabData.initialInvestment
+            }
             onChange={(e) =>
-              handleInitialInvestmentChange(Number(e.target.value))
+              handleInitialInvestmentChange(
+                e.target.value === "" ? "" : Number(e.target.value)
+              )
             }
             fullWidth
             margin="normal"
@@ -157,12 +167,16 @@ export default function Home() {
                   <TextField
                     label="Monthly Contribution"
                     type="number"
-                    value={leg.monthlyContribution}
+                    value={
+                      leg.monthlyContribution === ""
+                        ? ""
+                        : leg.monthlyContribution
+                    }
                     onChange={(e) =>
                       handleLegChange(
                         leg.id,
                         "monthlyContribution",
-                        Number(e.target.value)
+                        e.target.value === "" ? "" : Number(e.target.value)
                       )
                     }
                     fullWidth
@@ -172,9 +186,13 @@ export default function Home() {
                   <TextField
                     label="Years"
                     type="number"
-                    value={leg.years}
+                    value={leg.years === "" ? "" : leg.years}
                     onChange={(e) =>
-                      handleLegChange(leg.id, "years", Number(e.target.value))
+                      handleLegChange(
+                        leg.id,
+                        "years",
+                        e.target.value === "" ? "" : Number(e.target.value)
+                      )
                     }
                     fullWidth
                     margin="normal"
@@ -183,12 +201,12 @@ export default function Home() {
                   <TextField
                     label="Interest Rate (%)"
                     type="number"
-                    value={leg.interestRate}
+                    value={leg.interestRate === "" ? "" : leg.interestRate}
                     onChange={(e) =>
                       handleLegChange(
                         leg.id,
                         "interestRate",
-                        Number(e.target.value)
+                        e.target.value === "" ? "" : Number(e.target.value)
                       )
                     }
                     fullWidth
